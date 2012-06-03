@@ -18,11 +18,13 @@ class ImporterFactory < ActiveRecord::Base
     grab_from_remote("#{@@source.query}" + add_paging(num_per_page, page))
   end
 
+
+  #TODO: More robust, doing our best here
   def ImporterFactory.batch_with_query(query, num_per_page = nil, page = nil)
     #ridonculous one liner that compares every column with 
     #all the different querys in the query string
     #it is pretty intense -- double split map
-    sql_string = generate_sql("(#{@@source.search_columns.split(';').map { |column| query.split.map { |query| " #{column} LIKE '%#{query}%'"}.join(" OR") }.join(" OR")})") + add_paging(num_per_page, page)
+    sql_string = generate_sql("(#{@@source.search_columns.map { |column| query.split.map { |query| " #{column} LIKE '%#{query}%'"}.join(" OR") }.join(" OR")})") + add_paging(num_per_page, page)
 
     grab_from_remote(sql_string)
   end
@@ -37,7 +39,7 @@ class ImporterFactory < ActiveRecord::Base
     if query.nil? or query.blank?
       sql_string = @@source.query.gsub(/^SELECT(.*)FROM/, 'SELECT COUNT(*) FROM')
     else
-      sql_string = generate_sql("(#{@@source.search_columns.split(';').map { |column| query.split.map { |query| " #{column} LIKE '%#{query}%'"}.join(" OR") }.join(" OR")})").gsub(/^SELECT(.*)FROM/, 'SELECT COUNT(*) FROM')
+      sql_string = generate_sql("(#{@@source.search_columns.map { |column| query.split.map { |query| " #{column} LIKE '%#{query}%'"}.join(" OR") }.join(" OR")})").gsub(/^SELECT(.*)FROM/, 'SELECT COUNT(*) FROM')
     end
     c = ImporterFactory.connection.execute(sql_string)
     # execute returns a mysql2 result object, the count query returns a single element array within another array
@@ -67,7 +69,7 @@ private
   def ImporterFactory.grab_from_remote(sql)
     importers = []
     find_by_sql(sql).each do |data|
-      importer = @@source.importers.build(:raw_data => data)
+      importer = Importer.new(:raw_data => data)
       importer.generate_data_from_source_syntax(@@source)
       importers << importer
     end
@@ -75,11 +77,7 @@ private
   end
 
   def ImporterFactory.id_field
-    @@source.record_id_string.gsub(/\{[\S]+?\}/) do |match|
-      match.slice! '{'
-      match.slice! '}'
-      match
-    end
+    @@source.id_field
   end
 
   def ImporterFactory.generate_sql(where)

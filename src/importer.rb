@@ -2,6 +2,7 @@ class Importer < ActiveRecord::Base
 
   attr_accessible :source_id, :external_id
 
+
   def raw_data
     @raw_data
   end
