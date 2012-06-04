@@ -2,7 +2,6 @@ class Importer < ActiveRecord::Base
 
   attr_accessible :source_id, :external_id
 
-
   def raw_data
     @raw_data
   end
@@ -10,6 +9,8 @@ class Importer < ActiveRecord::Base
   def raw_data=(raw_data)
     @raw_data = raw_data
   end
+
+private
 
   def generate_data_from_source_syntax(source = nil)
     raise "no RAW_DATA" if @raw_data.nil?
@@ -20,8 +21,6 @@ class Importer < ActiveRecord::Base
     self.email = derive(source.email_string, @raw_data)
     self.external_id = derive(source.record_id_string, @raw_data).to_i
   end
-
-private
 
   def derive(template, raw_data)
     template.gsub(/\{[\S]+?\}/) do |match|

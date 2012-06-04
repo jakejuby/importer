@@ -4,7 +4,6 @@ class CreateColumns < ActiveRecord::Migration
       t.string :source_id
       t.string :target_attr
       t.string :template
-      t.string :name
       t.timestamps
     end
   end

@@ -10,6 +10,7 @@ class CreateSources < ActiveRecord::Migration
       t.string :table_name
       t.string :id_field
       t.string :query
+      t.string :target
       t.timestamps
     end
   end

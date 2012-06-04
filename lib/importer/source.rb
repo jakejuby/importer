@@ -1,7 +1,7 @@
 module Importer
   class Source < ActiveRecord::Base
 
-    attr_accessible :adapter, :host, :username, :password, :database, :name, :table_name, :id_field, :query
+    attr_accessible :adapter, :host, :username, :password, :database, :name, :table_name, :id_field, :query, :target
 
     has_many :columns
 
